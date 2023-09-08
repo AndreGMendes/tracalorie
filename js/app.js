@@ -1,9 +1,10 @@
 
+// ⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇
+// A)  C L A S S E S  //  C O N S T R U C T O R S  //  M E T H O D S
 // --------------------------------------------------------------------------------------------
-// A) CLASSES // CONSTRUCTORS // PROPERTIES // METHODS
+// A.1) MAIN CLASS
 // --------------------------------------------------------------------------------------------
 class Calorietracker {
-    
     constructor () {
         this._calorieLimit = 2000;
         this._totalCalories = 0;
@@ -19,11 +20,12 @@ class Calorietracker {
     }
 
     // --------------------------------------------------------------------------------------------
-    // A.1) APP User Actions (Public Methods)
+    // A.1.1) APP User Actions (Public Methods)
     // --------------------------------------------------------------------------------------------
     addMeal (meal) {
         this._meals.push(meal)
         this._totalCalories += meal.calories;
+        this._displayNewMeal(meal);
         this._render();
         console.log(`-----> ${meal.name} with a total of ${meal.calories} calories was consumed`)
     }
@@ -31,14 +33,37 @@ class Calorietracker {
     addWorkOut (workout) {
         this._workouts.push(workout)
         this._totalCalories -= workout.calories;
+        this._displayNewWorkout(workout);
         this._render();
         console.log(`-----> ${workout.calories} calories were burned with ${workout.name}`)
     }
 
+    removeMeal(id) {
+        const index = this._meals.findIndex((meal) => meal.id === id)
+        
+        if (index !== -1) {
+            const meal = this._meals[index]
+            this._totalCalories -= meal.calories;
+            this._meals.splice(index, 1);
+            this._render();
+        }
+    }
+
+    removeWorkout(id) {
+        const index = this._workouts.findIndex((workout) => workout.id === id)
+        
+        if (index !== -1) {
+            const workout = this._workouts[index]
+            this._totalCalories += workout.calories;
+            this._workouts.splice(index, 1);
+            this._render();
+        }
+    }
+
     // --------------------------------------------------------------------------------------------
-    // A.2) UPDATE changes to the DOM Elements (Private Methods)
+    // A.1.2) UPDATE changes to the DOM Elements (Private Methods)
     // --------------------------------------------------------------------------------------------
-    // A.2.1) Update Values
+    // A.1.2.1) Update Values
     // --------------------------------------------------------------------------------------------
     _displaycaloriesLimit () {
         console.log(`Calorie Limit: ${this._calorieLimit}`);
@@ -87,8 +112,46 @@ class Calorietracker {
         }
     }
 
+    _displayNewMeal (meal) {
+        const mealsEl = document.getElementById('meal-items')
+        const mealEl = document.createElement('div');
+        mealEl.classList.add('card', 'my-2') ;
+        mealEl.setAttribute('data-id', meal.id)
+
+        mealEl.innerHTML = 
+        `
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="mx-1">${meal.name}</h4>
+                <div class="fs-1 bg-primary text-white text-center rounded-2 px-2 px-sm-5">${meal.calories}</div>
+                <button class="delete btn btn-danger btn-sm mx-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        `
+        mealsEl.appendChild(mealEl);
+    }
+
+    _displayNewWorkout (workout) {
+        const workoutsEl = document.getElementById('workout-items')
+        const workoutEl = document.createElement('div');
+        workoutEl.classList.add('card', 'my-2') ;
+        workoutEl.setAttribute('data-id', workout.id)
+
+        workoutEl.innerHTML = 
+        `
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="mx-1">${workout.name}</h4>
+                <div class="fs-1 bg-secondary text-white text-center rounded-2 px-2 px-sm-5">${workout.calories}</div>
+                <button class="delete btn btn-danger btn-sm mx-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        `
+        workoutsEl.appendChild(workoutEl);
+    }
+
     // --------------------------------------------------------------------------------------------
-    // A.2.2) Update Progress Bar
+    // A.1.2.2) Update Progress Bar
     // --------------------------------------------------------------------------------------------
     _displayCaloriesProgress () {
         const progressBarEl = document.getElementById('calorie-progress');
@@ -97,11 +160,11 @@ class Calorietracker {
         console.log(`${width}%`);
 
         progressBarEl.style.width = `${width}%`;
-        progressBarEl.innerText = `${width}%`
+        progressBarEl.innerText = `${width.toFixed(2)}%`
     }
 
     // --------------------------------------------------------------------------------------------
-    // A.3) RENDER those changes to the DOM (Private Methods)
+    // A.1.3) RENDER those changes to the DOM (Private Methods)
     // --------------------------------------------------------------------------------------------
     _render () {
         this._displaycaloriesTotal();
@@ -109,13 +172,13 @@ class Calorietracker {
         this._displayCaloriesBurned();
         this._displayCaloriesRemaining();
         this._displayCaloriesProgress();
-    
     }
 }
 
-
+// --------------------------------------------------------------------------------------------
+// A.2) MODEL CLASSES
+// --------------------------------------------------------------------------------------------
 class Meal {
-
     constructor (name, calories) {
         this.id = Math.random().toString(16).slice(2)
         this.name = name;
@@ -125,38 +188,123 @@ class Meal {
 
 
 class Workout {
-
     constructor (name, calories) {
         this.id = Math.random().toString(16).slice(2)
         this.name = name;
         this.calories = calories;
     }
 }
+// ⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆
+// A)  C L A S S E S  //  C O N S T R U C T O R S  //  M E T H O D S
+// --------------------------------------------------------------------------------------------
 
 
-// --------------------------------------------------------------------------------------------
-// F O R    L O G G I N G    A N D    T E S T I N G    T H E    M O D U L E    A B O V E    
-// --------------------------------------------------------------------------------------------
-// B) OBJECTS INSTATIATIONS
-// --------------------------------------------------------------------------------------------
-// B.1) App
-// --------------------------------------------------------------------------------------------
-const tracker = new Calorietracker ();
 
-// --------------------------------------------------------------------------------------------
-// B.2) Meals
-// --------------------------------------------------------------------------------------------
-const breakfast = new Meal ('Breakfast', 400)
-const lunch = new Meal ('Lunch', 350)
 
+// ⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇
+// B)  M A I N  A P P
 // --------------------------------------------------------------------------------------------
-// B.3) Workouts
-// --------------------------------------------------------------------------------------------
-const run = new Workout ('Morning Run', 320)
+class App {
+    constructor () {
+        this._tracker = new Calorietracker();
 
-// --------------------------------------------------------------------------------------------
-// C) ACTIONS PERFORMED ON APP OBJECT
-// --------------------------------------------------------------------------------------------
+        document
+            .getElementById('meal-form')
+            .addEventListener('submit', this._newItem.bind(this, 'meal'));
+
+        document
+            .getElementById('workout-form')
+            .addEventListener('submit', this._newItem.bind(this, 'workout'));
+
+        document
+            .getElementById('meal-items')
+            .addEventListener('click', this._removeItem.bind(this, 'meal'));
+
+        document
+            .getElementById('workout-items')
+            .addEventListener('click', this._removeItem.bind(this, 'workout'));
+    }
+
+    _newItem(type, e) {
+        e.preventDefault();
+        // console.log(this);
+
+        const name = document.getElementById(`${type}-name`);
+        const calories = document.getElementById(`${type}-calories`);
+
+        // Validate Inputs
+        if (name.value === '' || calories.value === '') {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        if (type === 'meal') {
+            const meal = new Meal(name.value, parseInt(calories.value));
+            this._tracker.addMeal(meal);
+        } else {
+            const workout = new Workout(name.value, parseInt(calories.value));
+            this._tracker.addWorkOut(workout);
+        }
+
+        name.value = '';
+        name.calories = '';
+
+        const collapseItem = document.getElementById(`collapse-${type}`);
+        const bsCollapse = new bootstrap.Collapse(collapseItem, {
+            toggle:true
+        });        
+    }
+
+    _removeItem(type, e) {
+        e.preventDefault();
+        // console.log(this);
+
+        if (e.target.classList.contains('delete') || e.target.classList.contains('fa-xmark')) {
+            if (confirm('Are your sure?')) {
+                const id = e.target.closest('.card', 'my-2').getAttribute('data-id');
+                
+                type === 'meal' 
+                    ? this._tracker.removeMeal(id) 
+                    : this._tracker.removeWorkout(id) 
+
+                e.target.closest('.card', 'my-2').remove();
+            }
+        }
+    }
+   
+    
+}
+
+const app = new App();
+
+
+
+
+
+
+// // --------------------------------------------------------------------------------------------
+// // F O R    L O G G I N G    A N D    T E S T I N G    T H E    M O D U L E    A B O V E    
+// // --------------------------------------------------------------------------------------------
+// // Z) OBJECTS INSTATIATIONS
+// // --------------------------------------------------------------------------------------------
+// // Z.1) App
+// // --------------------------------------------------------------------------------------------
+// const tracker = new Calorietracker ();
+
+// // --------------------------------------------------------------------------------------------
+// // Z.2) Meals
+// // --------------------------------------------------------------------------------------------
+// const breakfast = new Meal ('Breakfast', 400)
+// const lunch = new Meal ('Lunch', 350)
+
+// // --------------------------------------------------------------------------------------------
+// // Z.3) Workouts
+// // --------------------------------------------------------------------------------------------
+// const run = new Workout ('Morning Run', 320)
+
+// // --------------------------------------------------------------------------------------------
+// // C) ACTIONS PERFORMED ON APP OBJECT
+// // --------------------------------------------------------------------------------------------
 // tracker.addMeal(breakfast)
 // tracker.addMeal(lunch)
 // tracker.addWorkOut(run)
