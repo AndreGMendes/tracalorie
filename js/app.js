@@ -250,7 +250,7 @@ class App {
         name.calories = '';
 
         const collapseItem = document.getElementById(`collapse-${type}`);
-        const bsCollapse = new bootstrap.Collapse(collapseItem, {
+        new bootstrap.Collapse(collapseItem, {
             toggle:true
         });        
     }
