@@ -6,7 +6,7 @@
 // --------------------------------------------------------------------------------------------
 class Calorietracker {
     constructor () {
-        this._calorieLimit = 2000;
+        this._calorieLimit = Storage.getCalorieLimit();
         this._totalCalories = 0;
         this._meals = [];
         this._workouts = [];
@@ -38,7 +38,7 @@ class Calorietracker {
         console.log(`-----> ${workout.calories} calories were burned with ${workout.name}`)
     }
 
-    removeMeal(id) {
+    removeMeal (id) {
         const index = this._meals.findIndex((meal) => meal.id === id)
         
         if (index !== -1) {
@@ -49,7 +49,7 @@ class Calorietracker {
         }
     }
 
-    removeWorkout(id) {
+    removeWorkout (id) {
         const index = this._workouts.findIndex((workout) => workout.id === id)
         
         if (index !== -1) {
@@ -58,6 +58,20 @@ class Calorietracker {
             this._workouts.splice(index, 1);
             this._render();
         }
+    }
+
+    reset () {
+        this._meals = [];
+        this._workouts = [];
+        this._totalCalories = 0;
+        this._render();
+    }
+
+    setLimit (calorieLimit) {
+        this._calorieLimit = calorieLimit;
+        Storage.setCalorieLimit(calorieLimit)
+        this._displaycaloriesLimit();
+        this._render();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -223,6 +237,22 @@ class App {
         document
             .getElementById('workout-items')
             .addEventListener('click', this._removeItem.bind(this, 'workout'));
+
+        document
+            .getElementById('filter-meals')
+            .addEventListener('keyup', this._filterItems.bind(this, 'meal'))
+
+        document
+            .getElementById('filter-workouts')
+            .addEventListener('keyup', this._filterItems.bind(this, 'workout'))
+
+        document
+            .getElementById('reset')
+            .addEventListener('click', this._reset.bind(this))
+
+        document
+            .getElementById('limit-form')
+            .addEventListener('submit', this._setLimit.bind(this))
     }
 
     _newItem(type, e) {
@@ -256,7 +286,6 @@ class App {
     }
 
     _removeItem(type, e) {
-        e.preventDefault();
         // console.log(this);
 
         if (e.target.classList.contains('delete') || e.target.classList.contains('fa-xmark')) {
@@ -271,9 +300,81 @@ class App {
             }
         }
     }
-   
-    
+
+    _filterItems (type, e) {
+        const text = e.target.value.toLowerCase();
+        console.log(text)
+
+        document.querySelectorAll(`#${type}-items .card`)
+            .forEach ((item) => {
+                const name = item.firstElementChild.firstElementChild.textContent;
+
+                if (name.toLowerCase().indexOf(text) !== -1) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none'
+                }
+            })
+    }
+
+    _reset () {
+        this._tracker.reset();
+        document.getElementById('meal-items').innerHTML = '';
+        document.getElementById('workout-items').innerHTML = '';
+        document.getElementById('filter-meals').value = '';
+        document.getElementById('filter-workouts').value = '';
+    }
+
+    _setLimit (e) {
+        e.preventDefault();
+        const limit = document.getElementById('limit');
+        
+        if (limit.value === '') {
+            alert('Please add a limit');
+            return;
+        }
+        
+        this._tracker.setLimit(parseInt(limit.value));
+        limit.value = '';
+
+        const modalEl = document.getElementById('limit-modal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+    }
 }
+// ⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆
+// B)  M A I N  A P P
+// --------------------------------------------------------------------------------------------
+
+
+
+
+// ⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇
+// C)  P E R S I S T E N C E
+// --------------------------------------------------------------------------------------------
+class Storage {
+    static getCalorieLimit (defaultLimit = 2000) {
+        let calorieLimit;
+
+        if (localStorage.getItem('calorieLimit') === null) {
+            calorieLimit = defaultLimit;
+        } else {
+            calorieLimit = localStorage.getItem('calorieLimit');
+        }
+        return calorieLimit;
+    }
+
+    static setCalorieLimit (calorieLimit) {
+        localStorage.setItem('calorieLimit', calorieLimit)
+    }
+}
+
+
+
+// ⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆⬆
+// C)  P E R S I S T E N C E
+// --------------------------------------------------------------------------------------------
+
 
 const app = new App();
 
